@@ -45,14 +45,10 @@ from markov import Markov
 from colors import Colors
 from orientation import Orientation
 
-# TODO: Zet SIMULATION op False om de EV3 aan te sturen, en True om een simulatie te doen
+SIMULATION = False
 
-
-SIMULATION = True
-
-if not SIMULATION:
+if SIMULATION:
     from robot import Robot
-
 
 # Helper functies
 def load_map(filename):
@@ -88,63 +84,48 @@ def load_map(filename):
 
     return world
 
-
 # Laad de juiste kaart
 start_orientation = Orientation.NORTH
 world = load_map("assets/test_plattegrond.txt")
 robot = None
 
 # Verbind met de robot Kies tussen echte of gesimuleerde robot
-# TODO: initialiseer Markov met de kaart
-
-if not SIMULATION:
+if SIMULATION:
     robot = Robot()
 else:
     robot = HistogramFilterSimulatedRobot(world, 6, 4, start_orientation)
     robot.draw()
 
 robot.connect_color()
-
 markov = Markov(world, start_orientation, "rddesmit")
-
 found = False
 
 while not found:
-    def calculate_direction((ly, lx), (dy, dx)):
-        if ly == dy:
-            # we are on the correct row, navigate to the correct column
-            return Orientation.WEST if lx > dx else Orientation.EAST
-        else:
-            # we are NOT on te correct row, navigate to the correct row
-            return Orientation.NORTH if ly > dy else Orientation.SOUTH
-
-    def rotate(c_orientation, d_orientation):
-        if c_orientation - d_orientation == 0:
-            pass
-        elif c_orientation - d_orientation >= 1:
-            robot.rotate(-1)
-            markov.rotate(-1)
-        else:
-            robot.rotate(1)
-            markov.rotate(1)
-
     location = markov.current_estimate()
-    destination = (3, 6)
+    destination = (1, 1)
 
-
-    # TODO: beweeg de robot en update de Markov (probeer eerst vast of random route,
-    # denk daarna na over een strategie die je bij de parkeerplaats brengt)
     # drive
     robot.drive(0.10)
     markov.move()
 
     # rotate
-    direction = calculate_direction((location[1], location[2]), destination)
-    while markov._orientation != direction:
-        rotate(markov._orientation, direction)
+    direction = Orientation.calculate_direction((location[1], location[2]), destination)
+    while direction != markov._orientation:
+        rotate_direction = Orientation.rotate(markov._orientation, direction)
 
-    # TODO: doe een measurement en update de Markov
+        if rotate_direction == Orientation.LEFT:
+            markov.rotate_left()
+            robot.turn_left()
+            time.sleep(3)
+        elif rotate_direction == Orientation.RIGHT:
+            markov.rotate_right()
+            robot.turn_right()
+            time.sleep(3)
+        else:
+            pass
+
     # calculate
+    time.sleep(2)
     measurement = robot.sense_color()
     markov.update(measurement)
 
@@ -153,17 +134,5 @@ while not found:
             found = True
             print "found"
 
-    # for x in markov._p:
-    #     print x
-
     print markov
-    time.sleep(3)
-
-
-
-
-
-
-
-
-# TODO: bekijk je estimate en besluit of je kunt stoppen of terug moet naar de meting
+    time.sleep(1)

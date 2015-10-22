@@ -8,11 +8,11 @@ import random
 # Het ip-adres van de ev3 die bestuurd wordt
 
 # TODO: Aanpassen voor jouw robot
-IP_EV3 = "192.168.0.10"
+IP_EV3 = "172.31.81.109"
 # Straal (as tot grond) van de wielen in meters(!)
-WHEEL_RADIUS = 1.0
+WHEEL_RADIUS = 0.04
 # Afstand tussen de wielen in meters
-WHEEL_BASE = 1.0
+WHEEL_BASE = 0.119
 # Aantal 'tikken' van de rotary counter in een wiel, bij de EV3 is die 360 tikken per omwenteling
 WHEEL_TICKS360 = 360.
 

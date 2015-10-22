@@ -10,7 +10,7 @@ class Markov:
 
     """
 
-    def __init__(self, world, orientation, name):
+    def __init__(self, world, orientation, name, p_hit=.7, p_overshoot=.1, p_undershoot=.1):
         """
         Geef Markov de kaart, initiele robot orientatie en een naam voor deze Markov
         """
@@ -26,7 +26,6 @@ class Markov:
         # !!! Coordinates are swapped, because multidimensional arrays are used !!!
         # (x,y) => map[y][x]
         # orientations are swapped accordingly
-        self._orientations = [[-1, 0], [0, 1], [1, 0], [0, -1]]
         # set world and orientatio
         self._world = world
         self._orientation = orientation
@@ -37,10 +36,10 @@ class Markov:
 
         # TODO: pas deze waarden aan om de robot meer of minder accuraat te maken
         # init sensor probabilities
-        self._pHit = 0.7
+        self._pHit = p_hit
         self._pMiss = 1. - self._pHit
-        self._pOvershoot = 0.05
-        self._pUndershoot = 0.05
+        self._pOvershoot = p_overshoot
+        self._pUndershoot = p_undershoot
         self._pExact = 1. - self._pOvershoot - self._pUndershoot
 
     def normalize(self):
@@ -61,6 +60,12 @@ class Markov:
         debug_string = "\n" + debug_string + "Best estimate: " + str(self.current_estimate()) + "\n\n"
 
         return debug_string
+
+    def rotate_left(self):
+        self.rotate(-1)
+
+    def rotate_right(self):
+        self.rotate(1)
 
     def rotate(self, direction):
         """
@@ -102,12 +107,11 @@ class Markov:
 
         def move_east(d):
             def p(yi, xi):
-                s = self._pExact * self._p[yi][(xi-d) % len(self._p)]
-                s += self._pOvershoot * self._p[yi][(xi-d-1) % len(self._p)]
-                s += self._pUndershoot * self._p[yi][(xi-d+1) % len(self._p)]
+                s = self._pExact * self._p[yi][(xi-d) % len(self._p[0])]
+                s += self._pOvershoot * self._p[yi][(xi-d-1) % len(self._p[0])]
+                s += self._pUndershoot * self._p[yi][(xi-d+1) % len(self._p[0])]
                 return s
 
-            d %= len(self._p[0])
             self._p = [[p(yi, xi) for (xi, x) in enumerate(y)] for (yi, y) in enumerate(self._p)]
 
         def move_south(d):
@@ -125,6 +129,8 @@ class Markov:
             move_south(distance)
         elif self._orientation == Orientation.WEST:
             move_west(distance)
+
+        self.normalize()
 
     def current_estimates(self):
         """
