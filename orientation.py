@@ -1,5 +1,6 @@
 import random
 
+
 class Orientation:
 
     def __init__(self):

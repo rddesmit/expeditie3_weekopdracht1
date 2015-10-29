@@ -40,7 +40,7 @@ die makkelijk vinden doordat ze blauw in de kantlijn staan)
 import csv
 import time
 import random
-from histogram_filter_simulated_robot import HistogramFilterSimulatedRobot
+from histogram_filter import HistogramFilter
 from markov import Markov
 from colors import Colors
 from orientation import Orientation
@@ -93,7 +93,7 @@ robot = None
 if SIMULATION:
     robot = Robot()
 else:
-    robot = HistogramFilterSimulatedRobot(world, 6, 4, start_orientation)
+    robot = HistogramFilter(world, 6, 4, start_orientation)
     robot.draw()
 
 robot.connect_color()

@@ -7,7 +7,7 @@ import random
 from colors import Colors
 
 
-class HistogramFilterSimulatedRobot:
+class HistogramFilter:
 
     SCREEN_WIDTH = 800
     SCREEN_HEIGHT = 600
